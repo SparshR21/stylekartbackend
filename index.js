@@ -7,7 +7,7 @@ const path = require("path");
 const cors = require("cors");
 require('dotenv').config()
 const port = process.env.PORT;
-const baseUrl = 'https://stylekartbackend.onrender.app'
+const baseUrl = 'https://stylekartbackend.onrender.com'
 
 
 app.use(express.json()); //whatever request we will get from response will automatically be passed through json
