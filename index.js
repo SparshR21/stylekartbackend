@@ -7,7 +7,7 @@ const path = require("path");
 const cors = require("cors");
 require('dotenv').config()
 const port = process.env.PORT;
-
+const baseUrl = 'https://stylekartbackend.onrender.app'
 
 
 app.use(express.json()); //whatever request we will get from response will automatically be passed through json
@@ -40,7 +40,7 @@ app.use("/images",express.static('upload/images'))
 app.post("/upload",upload.single('product'),(req,res)=>{
     res.json({
         success:1,
-        Image_url:`http://localhost:${port}/images/${req.file.filename}`
+        Image_url:`${baseUrl}/images/${req.file.filename}`
     })
 })
 
