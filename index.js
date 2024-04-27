@@ -11,7 +11,10 @@ const port = process.env.PORT;
 
 
 app.use(express.json()); //whatever request we will get from response will automatically be passed through json
-app.use(cors());          //using this our react js prohject will connect to express app on 4000 port
+app.use(cors({
+  origin: 'https://stylekart.vercel.app',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}));          //using this our react js prohject will connect to express app on 4000 port
 
 require('dotenv').config()
 mongoose.connect(process.env.MONGO_URL)  //mongo db is connected with our express server
