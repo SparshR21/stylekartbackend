@@ -8,6 +8,7 @@ const cors = require("cors");
 require('dotenv').config()
 const port = process.env.PORT;
 const baseUrl = 'https://stylekartbackend.onrender.com'
+const bcrypt = require('bcryptjs');
 
 
 app.use(express.json()); //whatever request we will get from response will automatically be passed through json
@@ -150,63 +151,87 @@ const Users = mongoose.model('Users',{
     }
 })
 
-//creating endpoint for registering the user
+// Endpoint for user signup
+app.post('/signup', async (req, res) => {
+    try {
+        let { username, email, password } = req.body;
 
-app.post('/signup',async (req,res)=>{
-
-    let check = await Users.findOne({email:req.body.email});
-    if (check) {
-        return res.status(400).json({success:false,errors:"existing user found with same email"})
-    }
-    let cart = {};
-    for (let i = 0; i < 300; i++) {
-        cart[i]=0; 
-    }
-    const user = new Users({
-        name:req.body.username,
-        email:req.body.email,
-        password:req.body.password,
-        cartData:cart,
-    })
-
-    await user.save();
-
-    const data = {
-        user:{
-            id:user.id
+        // Check if a user with the same email exists
+        let existingUser = await Users.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, error: "User with this email already exists" });
         }
-    }
 
-    const token = jwt.sign(data,'secret_ecom');
-    res.json({success:true,token})
+        // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-})
+        // Initialize empty cart with 300 items set to 0
+        let cart = Array(300).fill(0).reduce((acc, _, i) => {
+            acc[i] = 0;
+            return acc;
+        }, {});
 
+        // Create new user
+        const user = new Users({
+            name: username,
+            email,
+            password: hashedPassword,
+            cartData: cart
+        });
 
-//creating endpoint for user login
+        await user.save();
 
-app.post('/login',async (req,res)=>{
-    let user = await Users.findOne({email:req.body.email});
-    if(user){
-        const passCompare  = req.body.password === user.password; 
-        if(passCompare){
-            const data = {
-                user:{
-                    id:user.id
-                }
+        // Create JWT payload
+        const payload = {
+            user: {
+                id: user.id
             }
-            const token = jwt.sign(data,'secret_ecom');
-            res.json({success:true,token});
-        }
-        else{
-            res.json({success:false,errors:"Wrong Password"});
-        }
-    }
-    else{
-        res.json({success:false,errors:"Wrong Email Id"})
-    }
-})
+        };
 
+        // Sign JWT and send response
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(201).json({ success: true, token });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: "Server error" });
+    }
+});
+
+// Endpoint for user login
+app.post('/login', async (req, res) => {
+    try {
+        let { email, password } = req.body;
+
+        // Check if the user exists
+        let user = await Users.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, error: "Invalid email or password" });
+        }
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, error: "Invalid email or password" });
+        }
+
+        // Create JWT payload
+        const payload = {
+            user: {
+                id: user.id
+            }
+        };
+
+        // Sign JWT and send response
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ success: true, token });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: "Server error" });
+    }
+});
 //creating endpoint for new collection data
 
 app.get('/newcollection',async (req,res)=>{
