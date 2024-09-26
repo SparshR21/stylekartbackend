@@ -8,7 +8,6 @@ const cors = require("cors");
 require('dotenv').config()
 const port = process.env.PORT;
 const baseUrl = 'https://stylekartbackend.onrender.com'
-const bcrypt = require('bcryptjs');
 
 
 app.use(express.json()); //whatever request we will get from response will automatically be passed through json
@@ -162,10 +161,6 @@ app.post('/signup', async (req, res) => {
             return res.status(400).json({ success: false, error: "User with this email already exists" });
         }
 
-        // Hash the password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
         // Initialize empty cart with 300 items set to 0
         let cart = Array(300).fill(0).reduce((acc, _, i) => {
             acc[i] = 0;
@@ -176,7 +171,7 @@ app.post('/signup', async (req, res) => {
         const user = new Users({
             name: username,
             email,
-            password: hashedPassword,
+            password, // No hashing, password is stored as-is
             cartData: cart
         });
 
@@ -210,8 +205,8 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ success: false, error: "Invalid email or password" });
         }
 
-        // Compare passwords
-        const isMatch = await bcrypt.compare(password, user.password);
+        // Compare passwords directly
+        const isMatch = password === user.password;
         if (!isMatch) {
             return res.status(401).json({ success: false, error: "Invalid email or password" });
         }
