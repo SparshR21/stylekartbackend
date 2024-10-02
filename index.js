@@ -12,7 +12,7 @@ const baseUrl = 'https://stylekartbackend.onrender.com';
 
 app.use(express.json());
 app.use(cors({
-    origin: ['https://stylekart.vercel.app', 'https://stylekartadmin.vercel.app', 'http://localhost:3000'],
+    origin: ['https://stylekart.vercel.app', 'https://stylekartadmin.vercel.app', 'https://stylekartbackend.onrender.com', 'http://localhost:3000'],
     optionsSuccessStatus: 200 
 }));
 
