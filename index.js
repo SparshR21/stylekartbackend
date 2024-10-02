@@ -227,6 +227,12 @@ app.post('/addtocart', fetchUser, async (req, res) => {
     res.send({ success: true, cartData: userData.cartData });
 });
 
+app.post('/getcart',fetchUser,async (req,res)=>{
+    console.log("Get Cart");
+    let userData = await Users.findOne({_id:req.user.id});
+    res.json(userData.cartData);
+})
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
