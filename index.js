@@ -13,7 +13,7 @@ const baseUrl = 'https://stylekartbackend.onrender.com'
 
 app.use(express.json()); //whatever request we will get from response will automatically be passed through json
 app.use(cors({
-    origin: ['https://stylekart.vercel.app', 'https://stylekartadmin.vercel.app', 'http://localhost:3000'],
+    origin: ['https://stylekart.vercel.app', 'https://stylekartadmin.vercel.app', 'https://stylekartbackend.onrender.com', 'http://localhost:3000'],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   }));         //using this our react js prohject will connect to express app on 4000 port
 
